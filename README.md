@@ -4,8 +4,6 @@
 # 小说创作脚本-plus
 
 这是一个使用OpenAI API生成小说章节的脚本。
-![image](https://github.com/buwanyuanshen/ChatGPT-NovelWrite/assets/144007759/6959a87f-1f17-46c2-8c9f-101037e41e3a)
-
 
 
 ## 如何使用
@@ -21,6 +19,8 @@
 ```bash
 pip install openai==0.28.0
 ```
+
+![image](https://github.com/buwanyuanshen/ChatGPT-NovelWrite/assets/144007759/a9b455bc-c8fd-4fb5-81b2-016d54716980)
 
 ## 配置文件
 
