@@ -17,7 +17,8 @@
 确保已安装必要的依赖，使用Python版本为3.8以上。
 
 ```bash
-pip install openai==0.28.0
+pip install -r requirements.txt
+
 ```
 
 ![image](https://github.com/buwanyuanshen/ChatGPT-NovelWrite/assets/144007759/a9b455bc-c8fd-4fb5-81b2-016d54716980)
