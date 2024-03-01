@@ -6,10 +6,8 @@ import random
 import tkinter as tk
 import threading
 import configparser
-
+# 设置代理网址
 openai.api_base = "https://api.openai-proxy.com/v1"
-
-
 # 检查配置文件是否存在，如果不存在则创建新的配置文件
 if not os.path.exists('settings.config'):
     config = configparser.ConfigParser()
@@ -19,8 +17,9 @@ if not os.path.exists('settings.config'):
     config['Settings']['api_keys'] = ''
     config['Settings']['selected_model'] = 'gpt-3.5-turbo-0125'
     config['Settings']['temperature'] = '0.5'
-    config['Settings']['max_tokens'] = '1000'
-    config['Settings']['tokens_per_chapter'] = '100'
+    config['Settings']['max_tokens'] = '2000'
+    config['Settings']['tokens_per_chapter'] = '500'
+    config['Settings']['api_base'] = 'https://api.openai-proxy.com/v1'  # 添加API base URL
 
     with open('settings.config', 'w') as configfile:
         config.write(configfile)
@@ -36,8 +35,10 @@ total_chapters = config.getint('Settings', 'total_chapters', fallback=3)
 api_keys_entry = config.get('Settings', 'api_keys', fallback='')
 selected_model = config.get('Settings', 'selected_model', fallback='gpt-3.5-turbo-0125')
 temperature = config.getfloat('Settings', 'temperature', fallback=0.5)
-max_tokens = config.getint('Settings', 'max_tokens', fallback=1000)
-tokens_per_chapter = config.getint('Settings', 'tokens_per_chapter', fallback=100)
+max_tokens = config.getint('Settings', 'max_tokens', fallback=2000)
+tokens_per_chapter = config.getint('Settings', 'tokens_per_chapter', fallback=500)
+api_base = config.get('Settings', 'api_base', fallback='https://api.openai-proxy.com/v1')  # 读取API base URL
+
 
 # 异步加载 API 密钥
 async def load_api_keys():
@@ -138,7 +139,7 @@ def write_novel():
         chapter_number += 1
 
 def start_writing():
-    global novel_name, total_chapters, output_folder, selected_model, temperature, max_tokens, tokens_per_chapter, temperature_var, max_tokens_var, api_keys
+    global novel_name, total_chapters, output_folder, selected_model, temperature, max_tokens, tokens_per_chapter, temperature_var, max_tokens_var, api_keys,api_base
 
     novel_name = novel_name_entry.get()
     total_chapters = int(total_chapters_entry.get())
@@ -150,7 +151,8 @@ def start_writing():
     temperature_var = float(temperature_entry.get())
     max_tokens_var = int(max_tokens_entry.get())
     api_keys = [key.strip() for key in api_keys_entry.get().split(',')]  # 获取并更新 API 密钥列表
-
+    api_base = api_base_entry.get()  # 获取并更新 API base URL
+    openai.api_base = api_base  # 更新 OpenAI API base
     try:
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
@@ -168,19 +170,27 @@ def start_writing():
     config['Settings']['max_tokens'] = str(max_tokens)
     config['Settings']['tokens_per_chapter'] = str(tokens_per_chapter)
     config['Settings']['api_keys'] = ', '.join([key.strip() for key in api_keys_entry.get().split(',')])
+    config['Settings']['api_base'] = api_base  # 将API base URL写入配置文件
 
     with open('settings.config', 'w') as configfile:
         config.write(configfile)
 def toggle_visibility():
+    # 切换API Keys Entry的可见性
     current_state = api_keys_entry.cget("show")
     new_state = "" if current_state == "*" else "*"
     api_keys_entry.config(show=new_state)
+
+    # 切换API Base Entry的可见性
+    current_state_api_base = api_base_entry.cget("show")
+    new_state_api_base = "" if current_state_api_base == "*" else "*"
+    api_base_entry.config(show=new_state_api_base)
+
 
 
 # 创建 Tkinter 窗口
 window = tk.Tk()
 window.title("小说创作脚本-plus")
-window.geometry("300x400")
+window.geometry("300x500")
 # 设置窗口自适应内容大小
 window.pack_propagate(True)
 
@@ -192,15 +202,18 @@ style.configure('TLabel', foreground='black', background='lightblue')
 style.configure('TMenubutton', foreground='navy', background='lightblue')
 style.configure('TCombobox', foreground='navy', background='lightblue')
 
-api_keys_label = ttk.Label(window, text="API密钥（用逗号分隔多个密钥）:", padding=(20, 5))
+api_base_label = ttk.Label(window, text="API代理（默认官方国内代理，填到v1）:", padding=(20, 5))
+api_base_label.pack()
+
+api_base_entry = ttk.Entry(window, width=40, show="*")
+api_base_entry.insert(0, api_base)
+api_base_entry.pack()
+
+api_keys_label = ttk.Label(window, text="API密钥（用英文逗号分隔多个密钥）:", padding=(20, 5))
 api_keys_label.pack()
 
 api_keys_entry = ttk.Entry(window, width=40, show="*")
 api_keys_entry.insert(0, ', '.join(api_keys))
-api_keys_entry.pack()
-
-# 在Entry组件上绑定Ctrl+V键
-api_keys_entry.bind('<Control-v>', lambda e: api_keys_entry.event_generate('<<Paste>>'))
 api_keys_entry.pack()
 show_hide_button = ttk.Button(window, text="显示/隐藏", command=toggle_visibility)
 
@@ -283,6 +296,7 @@ def save_config():
     max_tokens_value = str(max_tokens_entry.get())
     tokens_per_chapter_value = str(tokens_per_chapter_entry.get())
     api_keys_value = ', '.join(api_keys_entry.get().split(','))  # 更新 API 密钥列表
+    api_base_value = api_base_entry.get().strip('')  # 更新 API 密钥列表
 
     # 确保Settings部分存在
     if 'Settings' not in config:
@@ -296,6 +310,7 @@ def save_config():
     config.set('Settings', 'max_tokens', max_tokens_value)
     config.set('Settings', 'tokens_per_chapter', tokens_per_chapter_value)
     config.set('Settings', 'api_keys', api_keys_value)
+    config.set('Settings', 'api_base', api_base_value)
 
     # 将配置信息保存到配置文件
     with open('settings.config', 'w') as configfile:
