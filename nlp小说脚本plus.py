@@ -13,12 +13,13 @@ if not os.path.exists('settings.config'):
     config = configparser.ConfigParser()
     config['Settings'] = {}
     config['Settings']['novel_name'] = ''
+    config['Settings']['novel_outline'] = ''
     config['Settings']['total_chapters'] = '3'
     config['Settings']['api_keys'] = ''
     config['Settings']['selected_model'] = 'gpt-3.5-turbo-0125'
     config['Settings']['temperature'] = '0.5'
     config['Settings']['max_tokens'] = '2000'
-    config['Settings']['tokens_per_chapter'] = '500'
+    config['Settings']['tokens_per_chapter'] = '400'
     config['Settings']['api_base'] = 'https://api.openai-proxy.com/v1'  # 添加API base URL
 
     with open('settings.config', 'w') as configfile:
@@ -31,12 +32,13 @@ with open('settings.config', 'r') as configfile:
     config.read_file(configfile)
 
 novel_name = config.get('Settings', 'novel_name', fallback='')
+novel_outline = config.get('Settings', 'novel_outline', fallback='')
 total_chapters = config.getint('Settings', 'total_chapters', fallback=3)
 api_keys_entry = config.get('Settings', 'api_keys', fallback='')
 selected_model = config.get('Settings', 'selected_model', fallback='gpt-3.5-turbo-0125')
 temperature = config.getfloat('Settings', 'temperature', fallback=0.5)
 max_tokens = config.getint('Settings', 'max_tokens', fallback=2000)
-tokens_per_chapter = config.getint('Settings', 'tokens_per_chapter', fallback=500)
+tokens_per_chapter = config.getint('Settings', 'tokens_per_chapter', fallback=400)
 api_base = config.get('Settings', 'api_base', fallback='https://api.openai-proxy.com/v1')  # 读取API base URL
 
 
@@ -56,9 +58,9 @@ loop.run_until_complete(main())
 
 
 # 写入小说章节
-def write_novel_chapter(api_key, model, chapter_content, chapter_number, conversation_history, max_tokens_var):
+def write_novel_chapter(api_key, model, chapter_content, chapter_number, conversation_history):
     """使用OpenAI的API模型来编写小说章节"""
-    global temperature_var
+    global temperature_var,max_tokens_var
 
     openai.api_key = api_key  # 设置当前使用的 API 密钥
     response = openai.ChatCompletion.create(
@@ -68,18 +70,19 @@ def write_novel_chapter(api_key, model, chapter_content, chapter_number, convers
         messages=conversation_history + [
             {
                 "role": "system",
-                "content": f"你是一名专业的小说家，你的任务是编写小说《{novel_name}》，共有{total_chapters}章，每章{tokens_per_chapter}字，请自行构思每章章的标题和内容，开始编写第{chapter_number}章:"
+                "content": f"你是一名专业的小说作者，你的任务是编写小说《{novel_name}》，小说大纲为{novel_outline}，共有{total_chapters}章，每章{tokens_per_chapter}字，请自行构思每章的标题和内容，开始编写第{chapter_number}章:"
             },
             {"role": "user", "content": chapter_content},
         ]
     )
     generated_text = response['choices'][0]['message']['content']
+    print(generated_text)
     return generated_text, response['choices'][0]['message']['role'], response['choices'][0]['index']
 
 
 
 def write_novel():
-    global novel_name, total_chapters, output_folder, selected_model, tokens_per_chapter
+    global novel_name, novel_outline, total_chapters, output_folder, selected_model, tokens_per_chapter
     chapter_number = 1
     conversation_history = []
     used_api_keys = []
@@ -102,7 +105,7 @@ def write_novel():
             tokens_per_chapter_var = tokens_per_chapter
 
             generated_text, _, _ = write_novel_chapter(selected_api_key, selected_model, chapter_content, chapter_number,
-                                                       conversation_history, tokens_per_chapter_var)
+                                                       conversation_history)
 
             chapter_name = generated_text.split('\n', 1)[0]
 
@@ -139,9 +142,10 @@ def write_novel():
         chapter_number += 1
 
 def start_writing():
-    global novel_name, total_chapters, output_folder, selected_model, temperature, max_tokens, tokens_per_chapter, temperature_var, max_tokens_var, api_keys,api_base
+    global novel_name, novel_outline, total_chapters, output_folder, selected_model, temperature, max_tokens, tokens_per_chapter, temperature_var, max_tokens_var, api_keys,api_base
 
     novel_name = novel_name_entry.get()
+    novel_outline = novel_outline_entry.get()
     total_chapters = int(total_chapters_entry.get())
     output_folder = os.path.join(os.path.expanduser('~'), 'Desktop', novel_name)
     selected_model = model_var.get()
@@ -164,6 +168,7 @@ def start_writing():
 
     # 更新配置文件
     config['Settings']['novel_name'] = novel_name
+    config['Settings']['novel_outline'] = novel_outline
     config['Settings']['total_chapters'] = str(total_chapters)
     config['Settings']['selected_model'] = selected_model
     config['Settings']['temperature'] = str(temperature)
@@ -224,14 +229,21 @@ show_hide_button.pack(pady=5)
 novel_name_label = ttk.Label(window, text="小说名称:")
 novel_name_label.pack()
 
-novel_name_entry = ttk.Entry(window,width=20)
+novel_name_entry = ttk.Entry(window,width=30)
 novel_name_entry.insert(0, novel_name)
 novel_name_entry.pack()
+
+novel_outline_label = ttk.Label(window, text="小说大纲:")
+novel_outline_label.pack()
+
+novel_outline_entry = ttk.Entry(window,width=30)
+novel_outline_entry.insert(0, novel_outline)
+novel_outline_entry.pack()
 
 total_chapters_label = ttk.Label(window, text="总章节数:")
 total_chapters_label.pack()
 
-total_chapters_entry = ttk.Entry(window)
+total_chapters_entry = ttk.Entry(window,width=30)
 total_chapters_entry.insert(0, total_chapters)  # 设置默认值
 total_chapters_entry.pack()
 
@@ -261,27 +273,27 @@ model_var.set(selected_model)
 model_label = ttk.Label(window, text="选择模型:")
 model_label.pack()
 
-model_combobox = ttk.Combobox(window, textvariable=model_var, values=model_options, state="readonly")
+model_combobox = ttk.Combobox(window, textvariable=model_var, values=model_options, state="readonly",width=30)
 model_combobox.pack()
 
 temperature_label = ttk.Label(window, text="temperature:")
 temperature_label.pack()
 
-temperature_entry = ttk.Entry(window)
+temperature_entry = ttk.Entry(window,width=30)
 temperature_entry.insert(0, temperature)  # 设置默认值
 temperature_entry.pack()
 
 max_tokens_label = ttk.Label(window, text="max_tokens:")
 max_tokens_label.pack()
 
-max_tokens_entry = ttk.Entry(window)
+max_tokens_entry = ttk.Entry(window,width=30)
 max_tokens_entry.insert(0, max_tokens)  # 设置默认值
 max_tokens_entry.pack()
 
 tokens_per_chapter_label = ttk.Label(window, text="每章字数:")
 tokens_per_chapter_label.pack()
 
-tokens_per_chapter_entry = ttk.Entry(window)
+tokens_per_chapter_entry = ttk.Entry(window,width=30)
 tokens_per_chapter_entry.insert(0, tokens_per_chapter)  # 设置默认值
 tokens_per_chapter_entry.pack()
 
@@ -290,6 +302,7 @@ start_button.pack()
 def save_config():
     # 获取当前输入框中的配置信息
     novel_name_value = novel_name_entry.get()
+    novel_outline_value = novel_outline_entry.get()
     total_chapters_value = str(total_chapters_entry.get())
     selected_model_value = model_var.get()
     temperature_value = str(temperature_entry.get())
@@ -304,6 +317,7 @@ def save_config():
 
     # 更新或添加配置信息到Settings部分
     config.set('Settings', 'novel_name', novel_name_value)
+    config.set('Settings', 'novel_outline', novel_outline_value)
     config.set('Settings', 'total_chapters', total_chapters_value)
     config.set('Settings', 'selected_model', selected_model_value)
     config.set('Settings', 'temperature', temperature_value)
