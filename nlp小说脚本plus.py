@@ -17,8 +17,8 @@ if not os.path.exists('settings.config'):
     config['Settings']['novel_name'] = ''
     config['Settings']['total_chapters'] = '3'
     config['Settings']['api_keys'] = ''
-    config['Settings']['selected_model'] = 'gpt-3.5-turbo-1106'
-    config['Settings']['temperature'] = '0.1'
+    config['Settings']['selected_model'] = 'gpt-3.5-turbo-0125'
+    config['Settings']['temperature'] = '0.5'
     config['Settings']['max_tokens'] = '1000'
     config['Settings']['tokens_per_chapter'] = '100'
 
@@ -34,8 +34,8 @@ with open('settings.config', 'r') as configfile:
 novel_name = config.get('Settings', 'novel_name', fallback='')
 total_chapters = config.getint('Settings', 'total_chapters', fallback=3)
 api_keys_entry = config.get('Settings', 'api_keys', fallback='')
-selected_model = config.get('Settings', 'selected_model', fallback='gpt-3.5-turbo-1106')
-temperature = config.getfloat('Settings', 'temperature', fallback=0.1)
+selected_model = config.get('Settings', 'selected_model', fallback='gpt-3.5-turbo-0125')
+temperature = config.getfloat('Settings', 'temperature', fallback=0.5)
 max_tokens = config.getint('Settings', 'max_tokens', fallback=1000)
 tokens_per_chapter = config.getint('Settings', 'tokens_per_chapter', fallback=100)
 
@@ -223,16 +223,27 @@ total_chapters_entry.insert(0, total_chapters)  # 设置默认值
 total_chapters_entry.pack()
 
 model_options = [
+    "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-0613",
     "gpt-3.5-turbo-1106",
+    "gpt-3.5-turbo-0125",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-16k-0613",
-    "gpt-3.5-turbo-0613",
-    "gpt-3.5-turbo-0301",
+    "gpt-4",
+    "gpt-4-0314",
+    "gpt-4-0613",
+    "gpt-4-1106-preview",
+    "gpt-4-turbo-preview",
+    "gpt-4-0125-preview",
+    "gpt-4-32k",
+    "gpt-4-32k-0314",
+    "gpt-4-32k-0613",
+
 ]
 
 model_var = tk.StringVar(window)
-model_var.set(model_options[0])  # 设置默认选项
+model_var.set(selected_model)
 
 model_label = ttk.Label(window, text="选择模型:")
 model_label.pack()
