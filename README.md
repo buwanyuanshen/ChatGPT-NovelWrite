@@ -54,3 +54,16 @@ tokens_per_chapter = 400
 
 
 请替换“Your_Novel_Name”和“Your_API_Key_1, Your_API_Key_2”等内容为你实际的小说名称和API密钥。同时，你也可以根据实际需要添加或修改其他信息。
+# 截止2024.6.10最新ChatGPT免费使用网址，还在更新中！：
+1. ChatGPT-Demo: [ChatGPT-Demo](https://6.chatpro.icu) 
+2. ChatGPT-NextWeb:[ChatGPT-NextWeb](https://chatpro.icu)
+3. ChatGPT FREE:[ChatGPT FREE](https://api.ccfgpt.cn) 
+4. ChatGPT-Lobe:[ChatGPT-Lobe](https://66.chatpro.icu)
+5. Chat-Web:[Chat-Web](https://web.ccf666.cn) 
+6. Chat-MJ:[Chat-MJ](https://mj.chatpro.icu) 
+7. Paint-Web:[Paint-Web](https://paint.ccf666.cn) 
+8. Chat-Plus-Free:[Chat-Plus-Free](https://free.chatpro.icu)
+9. Chat-Plus-New-Charge:[Chat-Plus-New-Charge](https://gpt.chatpro.icu)
+10. Chat-Plus-Old-Charge:[Chat-Plus-Old-Charge](https://gpts.chatpro.icu)
+11. CF API:[CF API](https://api.ccf666.cn)
+12. 可以加入[q群226848325](https://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=1OOigjF5hxHUSQ5GE5U2UOIwswuckYOe&authKey=2pdTkM0NqehD2OuMojvBMnsmCAUcD6oO3ttDzS5CNle8tnre1a9Jp30aJZVUnC2c&noverify=0&group_code=226848325)学习交流！
